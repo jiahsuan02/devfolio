@@ -1,40 +1,20 @@
-import { useEffect, useState } from "react";
 import styles from "./hero.module.css";
 import Item from "../../prototypes/item";
-
-const navItems = [
-  { title: "Experience", href: "#experience", id: "experience" },
-  { title: "Projects", href: "#projects", id: "projects" },
-  { title: "Skills", href: "#skills", id: "skills" },
-];
+import useScrollSpy from "../../../hooks/useScrollSpy";
 
 const Hero = () => {
-  const [activeId, setActiveId] = useState("");
+  const navItems = [
+    { title: "Experience", href: "#experience", id: "experience" },
+    { title: "Projects", href: "#projects", id: "projects" },
+    { title: "Skills", href: "#skills", id: "skills" },
+  ];
 
-  useEffect(() => {
-    const sections = navItems
-      .map((item) => document.getElementById(item.id))
-      .filter(Boolean);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
-      },
-      {
-        root: null,
-        rootMargin: "0px 0px -50% 0px",
-        threshold: 0,
-      }
-    );
-
-    sections.forEach((section) => observer.observe(section));
-
-    return () => observer.disconnect();
-  }, []);
+  const ids = navItems.map((i) => i.id);
+  const [activeId, handleNavClick] = useScrollSpy(ids, {
+    rootMargin: "0px 0px -40% 0px",
+    threshold: [0, 0.25, 0.5, 0.75],
+    debounceMs: 120,
+  });
 
   return (
     <div className={styles.heroContent}>
@@ -47,13 +27,14 @@ const Hero = () => {
           開發經驗，參與產品開發，負責前端畫面實作、即時互動功能與 API 串接
         </p>
 
-        <nav className={styles.navLinks}>
+        <nav className={styles.navLinks} aria-label="menu">
           {navItems.map((item) => (
             <Item
               key={item.id}
               title={item.title}
               href={item.href}
               isActive={activeId === item.id}
+              onClick={(e) => handleNavClick(e, item.id)}
             />
           ))}
         </nav>
